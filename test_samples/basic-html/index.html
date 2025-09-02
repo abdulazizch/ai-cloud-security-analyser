@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Basic Reflected XSS Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; }
+    input, button { padding: .5rem .75rem; }
+    .result { margin-top: 1rem; padding: 1rem; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>Search</h1>
+  <form method="GET" action="">
+    <label>Query:
+      <input name="q" placeholder="try: <img src=x onerror=alert(1)>" />
+    </label>
+    <button type="submit">Go</button>
+  </form>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    // Intentionally vulnerable: reflects raw HTML from the query string into the DOM.
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    if (q !== null) {
+      document.getElementById('result').innerHTML = "Results for: " + q; // XSS sink
+    }
+  </script>
+</body>
+</html>
