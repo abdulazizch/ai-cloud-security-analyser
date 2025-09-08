@@ -99,13 +99,17 @@ All code snippets are normalized and semantically analyzed with CodeBERT.
 📂 File Structure
 MAIN-TOOL/
 ├── backend/        # FastAPI backend
+|    ├── main.py
+|    ├── parser.py
+|    └── requirements.txt
 ├── frontend/       # React frontend
 ├── analyzer/       # AI-based analyzer (CodeBERT)
+|   └── analyzer.py
 ├── test_samples/      # Sample apps for testing
 ├── reports/        # Generated Reports
-├── requirements.txt
 ├── package.json
 └── README.md
+├── cli.py
 └── run_tool.bat  # One click system start file
 
 
