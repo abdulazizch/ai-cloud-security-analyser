@@ -13,15 +13,16 @@ from . import parser, threat_data
 MODEL_NAME = "microsoft/codebert-base"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+REPORTS_DIR = "reports"
+os.makedirs(REPORTS_DIR, exist_ok=True)
+
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModel.from_pretrained(MODEL_NAME)
 model.to(DEVICE)
 model.eval()
 
 def embed_text(text: str) -> torch.Tensor:
-    """
-    Convert text into a normalized embedding vector using CodeBERT.
-    """
+    # Convert text into a normalized embedding vector using CodeBERT.
     with torch.no_grad():
         inputs = tokenizer(
             text,
@@ -105,7 +106,6 @@ def analyze_blocks(blocks, threshold=0.80):
     return results
 
 
-# Main CLI Entry Functions
 def analyze_file(filepath, threshold=0.80):
     blocks = parser.parse_file(filepath)
     return analyze_blocks(blocks, threshold)
@@ -126,34 +126,58 @@ def save_json(results, filename="analysis_report.json"):
 
 
 # Generate Report Function
-def generate_report(results, output_json=None):
-    """
-    Generate structured vulnerability report.
-    Optionally save to JSON file.
-    """
-    severity_counts = Counter([r["severity"] for r in results])
+# def generate_report(results, output_json=None):
+#     severity_counts = Counter([r["severity"] for r in results])
 
+#     report = {
+#         "metadata": {
+#             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#             "total_vulnerabilities": len(results),
+#             "severity_breakdown": dict(severity_counts)
+#         },
+#         "findings": results
+#     }
+
+#     if output_json:
+#         with open(output_json, "w", encoding="utf-8") as f:
+#             json.dump(report, f, indent=4)
+#         print(f"[+] Report saved to {output_json}")
+
+#     return report
+
+
+def generate_report(results, filename=None, saveFile=None):
+    from datetime import datetime
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    if not filename:
+        filename = f"report_{timestamp}.json"
+    
+    filepath = os.path.join(REPORTS_DIR, filename)
+    
+    from collections import Counter
+    severity_counts = Counter([r["severity"] for r in results])
     report = {
         "metadata": {
             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "total_vulnerabilities": len(results),
-            "severity_breakdown": dict(severity_counts)
+            "severity_breakdown": dict(severity_counts),
+            "filename": filename
         },
         "findings": results
     }
-
-    if output_json:
-        with open(output_json, "w", encoding="utf-8") as f:
+    
+    # Save JSON
+    if saveFile:
+        with open(filepath, "w", encoding="utf-8") as f:
+            import json
             json.dump(report, f, indent=4)
-        print(f"[+] Report saved to {output_json}")
-
+    
+    print(f"[+] Report saved to {filepath}")
     return report
 
 
 def print_summary(report):
-    """
-    Nicely print report summary in CLI.
-    """
     print("\n=== Vulnerability Analysis Summary ===")
     print(f"Generated: {report['metadata']['generated_at']}")
     print(f"Total Findings: {report['metadata']['total_vulnerabilities']}")

@@ -1,10 +1,8 @@
-# cli.py
 import os
 import sys
 from analyzer.analyzer import analyze_file, analyze_folder, generate_report, print_summary
 from fpdf import FPDF  # Make sure fpdf is installed: pip install fpdf
 
-# Ensure reports folder exists
 REPORTS_DIR = os.path.join(os.getcwd(), "reports")
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
@@ -51,7 +49,6 @@ def main():
         print(f"[!] Path not found: {path}")
         sys.exit(1)
 
-    # Ask user for export type
     export_choice = input("Choose export format - PDF (p), JSON (j), Both (pj): ").lower()
     if export_choice not in ['p', 'j', 'pj']:
         print("[!] Invalid choice. Defaulting to JSON.")
@@ -61,13 +58,12 @@ def main():
 
     if 'j' in export_choice:
         json_path = os.path.join(REPORTS_DIR, f"{base_name}_report.json")
-        generate_report(results, output_json=json_path)
+        generate_report(results, filename=json_path, saveFile=True)
 
     if 'p' in export_choice:
         pdf_path = os.path.join(REPORTS_DIR, f"{base_name}_report.pdf")
         export_pdf(report, pdf_path)
 
-    # Print summary
     print_summary(report)
 
 if __name__ == "__main__":
